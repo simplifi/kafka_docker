@@ -1,5 +1,5 @@
 /*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
+Copyright © 2019 Simpli.fi Holdings
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
-
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/viper"
 )
 
 var cfgFile string
@@ -29,16 +26,19 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "kafka_docker",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "Start up docker-compose with kafka",
+	Long: `Start up docker-compose with kafka.
+	Scans the docker-compose.yml file and finds a kafka container, and ensures that the advertised connection
+	is set correctly to allow the host to connect, but still allow inter-container communication.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Usage:
+	Starting up docker-compose:
+	kafka_docker up [-f /path/to/docker-compose.yml]
+
+	For symmetry also there is kafka_docker down, which just calls docker-compose down.
+
+	Defaults to looking in $PWD for the docker-compose.yml
+	`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -51,7 +51,14 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "file", "f", defaultDockerCompose(), "docker-compose (default is $PWD/docker-compose.yml)")
+}
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "file", "f", "docker-compose (default is $PWD/docker-compose.yml)")
+func defaultDockerCompose() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Couldn't find current directory")
+		os.Exit(1)
+	}
+	return dir + "/docker-compose.yml"
 }
