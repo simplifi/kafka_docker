@@ -1,7 +1,11 @@
+default : test
+
 test : build
 	go test ./...
-build : get
-	go build
-get :
-	go mod download
 
+build :
+	go mod tidy
+	go build
+
+lint :
+	golint ./...

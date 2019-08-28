@@ -34,6 +34,13 @@ func init() {
 	rootCmd.AddCommand(upCmd)
 }
 
+var upCmd = &cobra.Command{
+	Use:   "up",
+	Short: "docker-compose up with extra options",
+	Args:  cobra.MaximumNArgs(0),
+	Run:   doUpCmd,
+}
+
 func doUpCmd(cmd *cobra.Command, _args []string) {
 	dockerFilePath := rootCmd.PersistentFlags().Lookup("file").Value.String()
 	fmt.Printf("Using %s as the docker-compose configuration\n", dockerFilePath)
@@ -70,16 +77,11 @@ func doUpCmd(cmd *cobra.Command, _args []string) {
 }
 
 func dockerComposeUp(dockerFilePath string) {
-	cmd := exec.Command("docker-compose", "-f", dockerFilePath, "up", "-d")
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
+	stdout, stderr, err := bash("docker-compose", "-f", dockerFilePath, "up", "-d")
 	if err != nil {
 		fmt.Printf("Failure running docker-compose up: %v", err)
-		fmt.Printf("STDOUT:\n%s\n", stdout.String())
-		fmt.Printf("STDERR:\n%s\n", stderr.String())
+		fmt.Printf("STDOUT:\n%s\n", stdout)
+		fmt.Printf("STDERR:\n%s\n", stderr)
 		os.Exit(1)
 	}
 
@@ -94,6 +96,19 @@ func waitForTopics(service *dockercompose.Service, expectedTopics []string) {
 		}
 		time.Sleep(time.Second)
 	}
+}
+
+func createdTopics(service *dockercompose.Service) []string {
+	// docker-compose exec -T -e topic=$topic kafka1 /bin/bash -c '$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $KAFKA_ZOOKEEPER_CONNECT --list | grep -q $topic'
+	stdout, stderr, err := bash("docker-compose", "exec", "-T", service.Name, "/bin/bash", "-c", "$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $KAFKA_ZOOKEEPER_CONNECT --list")
+
+	if err != nil {
+		fmt.Printf("Failure running docker-compose exec: %v", err)
+		fmt.Printf("STDOUT:\n%s\n", stdout)
+		fmt.Printf("STDERR:\n%s\n", stderr)
+		os.Exit(1)
+	}
+	return strings.Split(stdout, "\n")
 }
 
 // Returns true if the sorted content of the slices are equal. Sorts the passed in slices in place
@@ -111,27 +126,14 @@ func eql(a, b []string) bool {
 	return true
 }
 
-func createdTopics(service *dockercompose.Service) []string {
-	// docker-compose exec -T -e topic=$topic kafka1 /bin/bash -c '$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $KAFKA_ZOOKEEPER_CONNECT --list | grep -q $topic'
-	cmd := exec.Command("docker-compose", "exec", "-T", service.Name, "/bin/bash", "-c", "$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $KAFKA_ZOOKEEPER_CONNECT --list")
+// Runs a bash command, returning stdout, stderr, and error if any.
+func bash(command string, args ...string) (string, string, error) {
+	cmd := exec.Command(command, args...)
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
-	if err != nil {
-		fmt.Printf("Failure running docker-compose exec: %v", err)
-		fmt.Printf("STDOUT:\n%s\n", stdout.String())
-		fmt.Printf("STDERR:\n%s\n", stderr.String())
-		os.Exit(1)
-	}
-	return strings.Split(stdout.String(), "\n")
-}
-
-var upCmd = &cobra.Command{
-	Use:   "up",
-	Short: "docker-compose up with extra options",
-	Args:  cobra.MaximumNArgs(0),
-	Run:   doUpCmd,
+	return stdout.String(), stderr.String(), err
 }
