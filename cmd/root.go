@@ -1,27 +1,12 @@
-/*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
+	"bytes"
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+	"os/exec"
 
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/viper"
+	"github.com/spf13/cobra"
 )
 
 var cfgFile string
@@ -29,16 +14,19 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "kafka_docker",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "Start up docker-compose with kafka",
+	Long: `Start up docker-compose with kafka.
+	Scans the docker-compose.yml file and finds a kafka container, and ensures that the advertised connection
+	is set correctly to allow the host to connect, but still allow inter-container communication.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Usage:
+	Starting up docker-compose:
+	kafka_docker up [-f /path/to/docker-compose.yml]
+
+	For symmetry also there is kafka_docker down, which just calls docker-compose down.
+
+	Defaults to looking in $PWD for the docker-compose.yml
+	`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -51,7 +39,34 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "file", "f", defaultDockerCompose(), "docker-compose (default is $PWD/docker-compose.yml)")
+}
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "file", "f", "docker-compose (default is $PWD/docker-compose.yml)")
+func defaultDockerCompose() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Couldn't find current directory")
+		os.Exit(1)
+	}
+	return dir + "/docker-compose.yml"
+}
+
+// Runs a bash command, returning stdout, stderr, and exit code if any.
+func bash(command string, args ...string) (string, string, int) {
+	cmd := exec.Command(command, args...)
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			return stdout.String(), stderr.String(), exitError.ExitCode()
+		}
+		// Unknown error code, return 255
+		return stdout.String(), stderr.String(), 255
+	}
+	return stdout.String(), stderr.String(), 0
 }
