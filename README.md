@@ -70,7 +70,8 @@ Additionally you can run linting with
 make lint
 ```
 
-It is strongly recommended that lint
+It is strongly recommended that linting passes, but Travis-CI does not run the linters because golint specifies that
+it may have false positives and shouldn't be relied on automatically.
 
 Other make commands:
 ```
