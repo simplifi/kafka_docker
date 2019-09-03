@@ -5,3 +5,16 @@ env:
 
 go:
   - "1.12"
+
+before_deploy:
+  - GOOS=linux go build -o kafka_docker-linux
+  - GOOS=darwin go build -o kafka_docker-macos
+deploy:
+  provider: releases
+  api_key: ${GITHUB_OAUTH_KEY}
+  file:
+    - kafka_docker-macos
+    - kafka_docker-linux
+  skip_cleanup: true
+  on:
+    tags: true
