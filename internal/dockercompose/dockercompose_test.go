@@ -11,6 +11,19 @@ services:
     image: wurstmeister/zookeeper:3.4.6
     ports:
       - "2181:2181"
+  the_wrong_kafka:
+    image: wurstmeister/kafka:2.11-1.1.1
+    ports:
+      - "9093:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${DOCKER_IP}:9093
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
   the_right_kafka:
     image: wurstmeister/kafka:2.11-1.1.1
     ports:
@@ -25,19 +38,6 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${DOCKER_IP}:9092"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  the_wrong_kafka:
-    image: wurstmeister/kafka:2.11-1.1.1
-    ports:
-      - "9093:9092"
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${DOCKER_IP}:9093
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
   the_not_right_kafka:
     image: wurstmeister/kafka:2.11-1.1.1
     ports:
@@ -49,6 +49,10 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${DOCKER_IP}:9094
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  environment_without_maps:
+    image: blah
+    environment:
+      - "FOO=bar"
 `)
 
 func TestParse(t *testing.T) {

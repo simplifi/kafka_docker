@@ -14,7 +14,24 @@ import (
 type Service struct {
 	Name        string
 	Image       string
-	Environment map[string]string
+	Environment interface{}
+}
+
+// Casts the Environment (which could be a []string or map[string]string, but has to be parsed as an
+// interface{}, which becomes a map[interface{}]interface{} in the YAML library to a map[string]string.
+func (s *Service) getEnvironment() map[string]string {
+	switch val := s.Environment.(type) {
+	case map[string]string:
+		return val
+	case map[interface{}]interface{}:
+		r := make(map[string]string)
+		for k, v := range val {
+			r[k.(string)] = v.(string)
+		}
+		return r
+	default:
+		return make(map[string]string)
+	}
 }
 
 // DockerCompose represents a docker-compose file
@@ -35,7 +52,7 @@ func Parse(yamlFile []byte) (DockerCompose, error) {
 // as a Service struct.
 func (dc *DockerCompose) FindKafkaContainer() (Service, error) {
 	for name, service := range dc.Services {
-		if strings.HasPrefix(service.Image, "wurstmeister/kafka") && service.Environment != nil && service.Environment["KAFKA_CREATE_TOPICS"] != "" {
+		if strings.HasPrefix(service.Image, "wurstmeister/kafka") && service.getEnvironment()["KAFKA_CREATE_TOPICS"] != "" {
 			service.Name = name
 			return service, nil
 		}
@@ -45,7 +62,7 @@ func (dc *DockerCompose) FindKafkaContainer() (Service, error) {
 
 // GetTopics returns a list of the kafka topics that a service creates
 func (service *Service) GetTopics() []string {
-	rawTopicString := service.Environment["KAFKA_CREATE_TOPICS"]
+	rawTopicString := service.getEnvironment()["KAFKA_CREATE_TOPICS"]
 	if rawTopicString == "" {
 		return make([]string, 0)
 	}
