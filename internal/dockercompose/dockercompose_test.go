@@ -73,7 +73,7 @@ func TestGetTopics(t *testing.T) {
 	service := Service{
 		Name:  "kafka",
 		Image: "wurstmeister/kafka:2.11-1.1.1",
-		Environment: map[string]string{
+		Environment: map[interface{}]interface{}{
 			"KAFKA_CREATE_TOPICS": "topic1:12:3",
 		},
 	}

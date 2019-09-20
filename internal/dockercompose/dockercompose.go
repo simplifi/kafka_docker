@@ -21,8 +21,6 @@ type Service struct {
 // interface{}, which becomes a map[interface{}]interface{} in the YAML library to a map[string]string.
 func (s *Service) getEnvironment() map[string]string {
 	switch val := s.Environment.(type) {
-	case map[string]string:
-		return val
 	case map[interface{}]interface{}:
 		r := make(map[string]string)
 		for k, v := range val {
