@@ -1,7 +1,7 @@
 default : test
 
 test : build
-	go test ./...
+	go test -v ./...
 
 build :
 	go mod tidy
