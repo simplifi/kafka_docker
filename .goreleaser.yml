@@ -16,7 +16,7 @@ builds:
       - amd64
 
 archives:
-  - format: tar.gz
+  - format: none
     files:
       - none*
 
