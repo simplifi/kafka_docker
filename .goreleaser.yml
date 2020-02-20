@@ -17,8 +17,6 @@ builds:
 
 archives:
   - format: none
-    files:
-      - none*
 
 brews:
   - github:
