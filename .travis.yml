@@ -4,17 +4,16 @@ env:
   - GO111MODULE=on
 
 go:
-  - "1.12"
+  - 1.13.x
 
-before_deploy:
-  - GOOS=linux go build -o kafka_docker-linux
-  - GOOS=darwin go build -o kafka_docker-macos
+script:
+  - make test
+
+# Calls goreleaser to build and push artifacts
 deploy:
-  provider: releases
-  api_key: ${GITHUB_OAUTH_KEY}
-  file:
-    - kafka_docker-macos
-    - kafka_docker-linux
-  skip_cleanup: true
-  on:
-    tags: true
+  - provider: script
+    skip_cleanup: true
+    script: curl -sL https://git.io/goreleaser | bash
+    on:
+      tags: true
+      condition: $TRAVIS_OS_NAME = linux
