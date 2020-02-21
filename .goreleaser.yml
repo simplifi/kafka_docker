@@ -1,0 +1,35 @@
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    flags:
+      - -v
+    ldflags:
+      -  -X github.com/simplifi/kafka_docker/version.Version={{.Version}}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+
+archives:
+  - format: tar.gz
+
+brews:
+  - github:
+      owner: simplifi
+      name: homebrew-tap
+    folder: Formula
+    download_strategy: GitHubPrivateRepositoryReleaseDownloadStrategy
+    custom_require: "../lib/custom_download_strategy"
+    homepage: "https://github.com/simplifi/kafka_docker"
+    description: "Docker all the Kafkas!"
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  skip: true
