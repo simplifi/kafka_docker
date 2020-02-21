@@ -16,7 +16,7 @@ builds:
       - amd64
 
 archives:
-  - format: none
+  - format: tar.gz
 
 brews:
   - github:
