@@ -54,4 +54,4 @@ if [ "$asset_id" = "null" ]; then
   exit 1
 fi;
 
-curl -L -H 'Accept:application/octet-stream' https://$TOKEN:@api.github.com/repos/$REPO/releases/assets/$asset_id | tar -xz
+curl -L -H 'Accept:application/octet-stream' https://$TOKEN:@api.github.com/repos/$REPO/releases/assets/$asset_id | tar -xvz --exclude="README.md" --exclude="LICENSE"
