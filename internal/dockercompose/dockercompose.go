@@ -68,7 +68,7 @@ func (service *Service) GetTopics() []string {
 	topics := make([]string, len(topicDefinitions))
 	for i := 0; i < len(topicDefinitions); i++ {
 		topicDefinition := strings.Split(topicDefinitions[i], ":")
-		topics[i] = topicDefinition[0]
+		topics[i] = strings.TrimSpace(topicDefinition[0])
 	}
 	return topics
 }
