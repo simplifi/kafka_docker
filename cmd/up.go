@@ -79,7 +79,7 @@ func waitForTopics(service *dockercompose.Service, expectedTopics []string) {
 		if eql(foundTopics, expectedTopics) {
 			return
 		}
-		// fmt.Print(".")
+		fmt.Print(".")
 		time.Sleep(time.Second)
 	}
 	if eql(createdTopics(service), expectedTopics) {
