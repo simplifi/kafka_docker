@@ -12,11 +12,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Seconds to wait for kafka topic creation to finish
-const maximumWaitTime = 30
+var timeout uint32
 
 func init() {
 	rootCmd.AddCommand(upCmd)
+	upCmd.PersistentFlags().Uint32VarP(&timeout, "timeout", "t", 30, "seconds to wait on the topics to become ready")
 }
 
 var upCmd = &cobra.Command{
@@ -56,7 +56,7 @@ func doUpCmd(cmd *cobra.Command, _args []string) {
 	fmt.Printf("docker-compose -f %s up -d\n", dockerFilePath)
 	dockerComposeUp(dockerFilePath)
 
-	fmt.Print("waiting for topics to be created")
+	fmt.Println("waiting for topics to be created")
 	waitForTopics(&kafkaService, topics)
 	fmt.Println("\ndone.")
 }
@@ -69,19 +69,24 @@ func dockerComposeUp(dockerFilePath string) {
 		fmt.Printf("STDERR:\n%s\n", stderr)
 		os.Exit(err)
 	}
-
 }
 
 // waitForTopics queries the running kafka instance to see if the topics are available
 func waitForTopics(service *dockercompose.Service, expectedTopics []string) {
 	// Wait for a bit for topics to be created (should take < 5 seconds)
-	for i := 0; i < maximumWaitTime; i++ {
-		if eql(createdTopics(service), expectedTopics) {
+	for i := uint32(0); i < timeout; i++ {
+		foundTopics := createdTopics(service)
+		if eql(foundTopics, expectedTopics) {
 			return
 		}
 		fmt.Print(".")
 		time.Sleep(time.Second)
 	}
+	if eql(createdTopics(service), expectedTopics) {
+		return
+	}
+	msg := fmt.Sprintf("Kafka Topics did not become available after %d seconds", timeout)
+	panic(msg)
 }
 
 func createdTopics(service *dockercompose.Service) []string {
@@ -94,7 +99,9 @@ func createdTopics(service *dockercompose.Service) []string {
 		fmt.Printf("STDERR:\n%s\n", stderr)
 		os.Exit(err)
 	}
-	topics := strings.Split(strings.TrimSpace(stdout), "\n")
+	rawTopics := strings.Split(strings.TrimSpace(stdout), "\n")
+	// Internal topic
+	topics := removeElem(rawTopics, "__consumer_offsets")
 	return topics
 }
 
@@ -111,4 +118,20 @@ func eql(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+func removeElem(s []string, e string) []string {
+	k := -1
+	for i := 0; i < len(s); i++ {
+		if s[i] == e {
+			k = i
+			break
+		}
+	}
+	if k >= 0 {
+		s[k] = s[len(s)-1]
+		// We do not need to put s[i] at the end, as it will be discarded anyway
+		return s[:len(s)-1]
+	}
+	return s
 }

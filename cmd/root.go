@@ -39,7 +39,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "file", "f", defaultDockerCompose(), "docker-compose (default is $PWD/docker-compose.yml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "file", "f", defaultDockerCompose(), "docker-compose file")
 }
 
 func defaultDockerCompose() string {
