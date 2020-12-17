@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/simplifi/kafka_docker/internal/dockercompose"
 	"github.com/spf13/cobra"
@@ -29,5 +28,4 @@ func dockerComposeIP() {
 		panic(err)
 	}
 	fmt.Printf("%s", dockerIP)
-	os.Setenv("DOCKER_IP", dockerIP)
 }
