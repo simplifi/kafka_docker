@@ -53,9 +53,17 @@ services:
 ```
 
 ## Usage
-
+Bring kafka containers online
 ```
 kafka_docker up [-f|--file <docker-compose-file>]
+```
+Halt kafka docker containers
+```
+kafka_docker down [-f|--file <docker-compose-file>]
+```
+Display ip associated to docker containers
+```
+kafka_docker ip 
 ```
 
 ## Testing
