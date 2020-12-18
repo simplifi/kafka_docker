@@ -27,5 +27,5 @@ func dockerComposeIP() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%s", dockerIP)
+	fmt.Printf("%s\n", dockerIP)
 }
