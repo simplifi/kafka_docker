@@ -50,7 +50,7 @@ func Parse(yamlFile []byte) (DockerCompose, error) {
 // as a Service struct.
 func (dc *DockerCompose) FindKafkaContainer() (Service, error) {
 	for name, service := range dc.Services {
-		if strings.HasPrefix(service.Image, "wurstmeister/kafka") && service.getEnvironment()["KAFKA_CREATE_TOPICS"] != "" {
+		if strings.Contains(service.Image, "wurstmeister/kafka") && service.getEnvironment()["KAFKA_CREATE_TOPICS"] != "" {
 			service.Name = name
 			return service, nil
 		}
