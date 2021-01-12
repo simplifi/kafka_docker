@@ -19,7 +19,7 @@ archives:
   - format: tar.gz
 
 brews:
-  - github:
+  - tap:
       owner: simplifi
       name: homebrew-tap
     folder: Formula
