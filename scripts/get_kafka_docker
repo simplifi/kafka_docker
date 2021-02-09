@@ -45,12 +45,12 @@ else
 fi
 release_json=`gh_curl -s $GITHUB/repos/$REPO/releases/$VERSION_TAG`
 
-# In the assets array of release_json, find asset with name matching PATTERN and store its id
-asset_id=`jq ".assets | map(select(.name | test(\"$PATTERN\")))[0].id" <<< "$release_json"`
+# In the assets array of release_json, find asset with name matching PATTERN and store its url
+asset_url=`jq -r ".assets | map(select(.name | test(\"$PATTERN\")))[0].url" <<< "$release_json"`
 
-if [ "$asset_id" = "null" ]; then
+if [ "$asset_url" = "null" ]; then
   errcho "ERROR: version not found $VERSION"
   exit 1
 fi
 
-curl -L -H 'Accept: application/octet-stream' $GITHUB/repos/$REPO/releases/assets/$asset_id | tar -xz --exclude="README.md" --exclude="LICENSE"
+curl -L -H 'Accept: application/octet-stream' $asset_url | tar -xz --exclude="README.md" --exclude="LICENSE"
