@@ -22,7 +22,6 @@
 
 set -x
 
-TOKEN=$GITHUB_TOKEN
 REPO=simplifi/kafka_docker
 # target architecture
 ARCH="linux_amd64"
@@ -35,9 +34,7 @@ GITHUB="https://api.github.com"
 alias errcho='>&2 echo'
 
 function gh_curl() {
-  curl -H "Authorization: token $TOKEN" \
-       -H "Accept: application/vnd.github.v3.raw" \
-       $@
+  curl $@ -H "Accept: application/vnd.github.v3.raw"
 }
 
 if [ "$VERSION" = "latest" ]; then
@@ -54,4 +51,4 @@ if [ "$asset_id" = "null" ]; then
   exit 1
 fi;
 
-curl -L -H 'Accept:application/octet-stream' https://$TOKEN:@api.github.com/repos/$REPO/releases/assets/$asset_id | tar -xz --exclude="README.md" --exclude="LICENSE"
+curl -L -H 'Accept: application/octet-stream' $GITHUB/repos/$REPO/releases/assets/$asset_id | tar -xz --exclude="README.md" --exclude="LICENSE"
