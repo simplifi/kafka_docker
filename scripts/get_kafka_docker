@@ -24,11 +24,11 @@ set -x
 
 REPO=simplifi/kafka_docker
 # target architecture
-ARCH="${ARCH:-linux_amd64}"
+GO_ARCH="${GO_ARCH:-linux_amd64}"
 # regular expression for the desired download
-PATTERN="kafka_docker_\\\\d+\\\\.\\\\d+\\\\.\\\\d+_${ARCH}\\\\.tar\\\\.gz"
+PATTERN="kafka_docker_\\\\d+\\\\.\\\\d+\\\\.\\\\d+_${GO_ARCH}\\\\.tar\\\\.gz"
 # tag name or the word "latest"
-VERSION=${VERSION:-latest}
+KAFKA_DOCKER_VERSION=${KAFKA_DOCKER_VERSION:-latest}
 GITHUB="https://api.github.com"
 
 alias errcho='>&2 echo'
@@ -38,10 +38,10 @@ function gh_curl() {
 }
 
 # Get data on just the release we're looking for from the api
-if [ "$VERSION" = "latest" ]; then
+if [ "$KAFKA_DOCKER_VERSION" = "latest" ]; then
   VERSION_TAG="latest"
 else
-  VERSION_TAG="tags/$VERSION"
+  VERSION_TAG="tags/$KAFKA_DOCKER_VERSION"
 fi
 release_json=`gh_curl -s $GITHUB/repos/$REPO/releases/$VERSION_TAG`
 
@@ -49,7 +49,7 @@ release_json=`gh_curl -s $GITHUB/repos/$REPO/releases/$VERSION_TAG`
 asset_url=`jq -r ".assets | map(select(.name | test(\"$PATTERN\")))[0].url" <<< "$release_json"`
 
 if [ "$asset_url" = "null" ]; then
-  errcho "ERROR: version not found $VERSION"
+  errcho "ERROR: version not found $KAFKA_DOCKER_VERSION"
   exit 1
 fi
 
