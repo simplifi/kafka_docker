@@ -24,9 +24,9 @@ set -x
 
 REPO=simplifi/kafka_docker
 # target architecture
-ARCH="${ARCH:-linux_amd64}"
+GO_ARCH="${GO_ARCH:-linux_amd64}"
 # regular expression for the desired download
-PATTERN="kafka_docker_\\\\d+\\\\.\\\\d+\\\\.\\\\d+_${ARCH}\\\\.tar\\\\.gz"
+PATTERN="kafka_docker_\\\\d+\\\\.\\\\d+\\\\.\\\\d+_${GO_ARCH}\\\\.tar\\\\.gz"
 # tag name or the word "latest"
 KAFKA_DOCKER_VERSION=${KAFKA_DOCKER_VERSION:-latest}
 GITHUB="https://api.github.com"
