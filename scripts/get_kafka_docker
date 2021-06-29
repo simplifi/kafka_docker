@@ -24,7 +24,7 @@ set -x
 
 REPO=simplifi/kafka_docker
 # target architecture
-GO_ARCH="${GO_ARCH:-linux_amd64}"
+GO_ARCH="${GO_ARCH:-$(uname -s)_amd64}"
 # regular expression for the desired download
 PATTERN="kafka_docker_\\\\d+\\\\.\\\\d+\\\\.\\\\d+_${GO_ARCH}\\\\.tar\\\\.gz"
 # tag name or the word "latest"
@@ -45,8 +45,8 @@ else
 fi
 release_json=`gh_curl -s $GITHUB/repos/$REPO/releases/$VERSION_TAG`
 
-# In the assets array of release_json, find asset with name matching PATTERN and store its url
-asset_url=`jq -r ".assets | map(select(.name | test(\"$PATTERN\")))[0].url" <<< "$release_json"`
+# In the assets array of release_json, find asset with name matching PATTERN (case insensitively) and store its url
+asset_url=`jq -r ".assets | map(select(.name | test(\"$PATTERN\", \"i\")))[0].url" <<< "$release_json"`
 
 if [ "$asset_url" = "null" ]; then
   errcho "ERROR: version not found $KAFKA_DOCKER_VERSION"
