@@ -1,11 +1,59 @@
-default : test
+TAG?=""
 
-test : build
-	go test -v ./...
+.DEFAULT_GOAL := test
 
-build :
+# Run all tests
+.PHONY: test
+test: fmt lint vet test-unit go-mod-tidy
+
+# Run unit tests
+.PHONY: test-unit
+test-unit:
+	go test -v -race ./...
+
+# Clean go.mod
+.PHONY: go-mod-tidy
+go-mod-tidy:
 	go mod tidy
-	go build
+	git diff --exit-code go.sum
 
-lint :
-	golint ./...
+# Check formatting
+.PHONY: fmt
+fmt:
+	test -z "$(shell gofmt -l .)"
+
+# Run linter
+.PHONY: lint
+lint:
+	golint -set_exit_status ./...
+
+# Run vet
+.PHONY: vet
+vet:
+	go vet ./...
+
+# Run a test release with goreleaser
+.PHONY: test-release
+test-release:
+	goreleaser --snapshot --skip-publish --rm-dist
+
+# Clean up any cruft left over from old builds
+.PHONY: clean
+clean:
+	rm -rf go-app-template dist/
+
+# Build the application
+.PHONY: build
+build: clean
+	CGO_ENABLED=0 go build
+
+# Create a git tag
+.PHONY: tag
+tag:
+	git tag -a $(TAG) -m "Release $(TAG)"
+	git push origin $(TAG)
+
+# Requires GITHUB_TOKEN environment variable to be set
+.PHONY: release
+release: clean
+	goreleaser
