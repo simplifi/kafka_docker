@@ -156,7 +156,7 @@ creation is automated using Travis CI. New releases are automatically created
 when new tags are pushed to the repo.
 
 ```shell script
-$ TAG=0.1.0 make tag
+$ TAG=v0.1.0 make tag
 ```
 
 #### Manual
