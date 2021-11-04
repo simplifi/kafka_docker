@@ -47,6 +47,10 @@ clean:
 build: clean
 	CGO_ENABLED=0 go build
 
+# For use in ci
+.PHONY: ci
+ci: build test go-mod-tidy
+
 # Create a git tag
 .PHONY: tag
 tag:
