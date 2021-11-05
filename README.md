@@ -5,18 +5,11 @@ that any topics that the Kafka container is creating via KAFKA_CREATE_TOPICS are
 
 ## Installation
 
-### Homebrew (preferred)
-
-- Setup the Simplifi Homebrew Tap by following these directions: https://github.com/simplifi/homebrew-tap#how-do-i-set-this-up
-- Run `brew install kafka_docker`
-
-### Manual
-
 - Browse to the [Releases](https://github.com/simplifi/kafka_docker/releases)
 - Navigate to the latest release
 - Click to download the appropriate release for your platform
 - Once downloaded, extract, then move the binary into your path and make it executable
-  - ex: `mv ~/Downloads/kafka_docker /usr/local/bin/kafka_docker && chmod +x /usr/local/bin/kafka_docker`
+  - example: `mv ~/Downloads/kafka_docker /usr/local/bin/kafka_docker && chmod +x /usr/local/bin/kafka_docker`
 
 ## Requirements
 
