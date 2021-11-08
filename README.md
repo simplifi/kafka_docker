@@ -3,6 +3,14 @@
 A docker-compose wrapper that brings up Kafka brokers, ensures the advertised listeners are correct, and ensures
 that any topics that the Kafka container is creating via KAFKA_CREATE_TOPICS are in place before returning
 
+## Installation
+
+- Browse to the [Releases](https://github.com/simplifi/kafka_docker/releases)
+- Navigate to the latest release
+- Click to download the appropriate release for your platform
+- Once downloaded, extract, then move the binary into your path and make it executable
+  - example: `mv ~/Downloads/kafka_docker /usr/local/bin/kafka_docker && chmod +x /usr/local/bin/kafka_docker`
+
 ## Requirements
 
 `kafka_docker` expects that you are using the [wurstmeister/kafka](https://hub.docker.com/r/wurstmeister/kafka/) images in a docker-compose.yml file, and that you are
@@ -53,6 +61,39 @@ services:
 ```
 
 ## Usage
+
+You can see the options available to you by running kafka_docker without any arguments:
+
+```bash
+Start up docker-compose with kafka.
+	Scans the docker-compose.yml file and finds a kafka container, and ensures that the advertised connection
+	is set correctly to allow the host to connect, but still allow inter-container communication.
+
+	Usage:
+	Starting up docker-compose:
+	kafka_docker up [-f /path/to/docker-compose.yml]
+
+	For symmetry also there is kafka_docker down, which just calls docker-compose down.
+
+	Defaults to looking in $PWD for the docker-compose.yml
+
+Usage:
+  kafka_docker [command]
+
+Available Commands:
+  down        Runs docker-compose down
+  help        Help about any command
+  ip          Outputs Docker IP
+  up          docker-compose up with extra options
+
+Flags:
+  -f, --file string   docker-compose file
+  -h, --help          help for kafka_docker
+
+Use "kafka_docker [command] --help" for more information about a command.
+```
+
+## Example Usages
 Bring kafka containers online
 ```
 kafka_docker up [-f|--file <docker-compose-file>]
@@ -63,8 +104,18 @@ kafka_docker down [-f|--file <docker-compose-file>]
 ```
 Display ip associated to docker containers
 ```
-kafka_docker ip 
+kafka_docker ip
 ```
+
+## Development
+
+### Tool Setup
+
+[Install Golang](https://golang.org/doc/install)
+
+[Install golint](https://github.com/golang/lint#installation)
+
+[Install goreleaser](https://goreleaser.com/install/)
 
 ## Testing
 
@@ -87,4 +138,26 @@ Other make commands:
 make get
 # Compile project:
 make build
+```
+
+### Releasing
+
+#### Automated
+
+This project is using [goreleaser](https://goreleaser.com). GitHub release
+creation is automated using Travis CI. New releases are automatically created
+when new tags are pushed to the repo.
+
+```shell script
+$ TAG=v0.1.0 make tag
+```
+
+#### Manual
+
+A release can also be manually pushed using goreleaser. You must have the
+`GITHUB_TOKEN` environment variable set to a GitHub token with the `repo` scope.
+You can create a new github token [here](https://github.com/settings/tokens/new).
+
+```shell script
+$ make release
 ```
