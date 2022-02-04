@@ -90,8 +90,9 @@ func waitForTopics(service *dockercompose.Service, expectedTopics []string) {
 }
 
 func createdTopics(service *dockercompose.Service) []string {
-	// docker-compose exec -T -e topic=$topic kafka1 /bin/bash -c '$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $KAFKA_ZOOKEEPER_CONNECT --list | grep -q $topic'
-	stdout, stderr, err := bash("docker-compose", "exec", "-T", service.Name, "/bin/bash", "-c", "$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $KAFKA_ZOOKEEPER_CONNECT --list")
+	dockerFilePath := rootCmd.PersistentFlags().Lookup("file").Value.String()
+	// docker-compose -f dev-kafka.yml exec -T -e topic=$topic kafka1 /bin/bash -c '$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $KAFKA_ZOOKEEPER_CONNECT --list | grep -q $topic'
+	stdout, stderr, err := bash("docker-compose", "-f", dockerFilePath, "exec", "-T", service.Name, "/bin/bash", "-c", "$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $KAFKA_ZOOKEEPER_CONNECT --list")
 
 	if err != 0 {
 		fmt.Println("Failure running docker-compose exec")
